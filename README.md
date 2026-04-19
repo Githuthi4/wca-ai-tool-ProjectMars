@@ -1,1 +1,1 @@
-# wca-ai-tool--Project-Mars-
+# wca-ai-tool-ProjectMars
