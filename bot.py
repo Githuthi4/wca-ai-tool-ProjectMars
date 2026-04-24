@@ -34,5 +34,6 @@ def run_quiz():
                 "Output:{'quiz:[{'question':'...','options':['A)..','B) ..'],'correct_answer':'A'}]}"
              )
             )
-
+    quiz_data = json.loads(response.text)  # Convert JSON string to Python dict
+    print(json.dumps(quiz_data, indent=2))  # Pretty print the quiz
         
