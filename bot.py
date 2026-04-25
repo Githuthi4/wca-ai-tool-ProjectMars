@@ -36,9 +36,14 @@ def run_quiz():
             )
     quiz_data = json.loads(response.text)  # Convert JSON string to Python dict
     print(json.dumps(quiz_data, indent=2))  # Pretty print the quiz
+
+      # Loop through and print each answer option (A, B, C, D)
     for q in quiz_data["quiz"]:  # Frank
+            # Display the current question with a newline for spacing
                 print("\n" + q["question"])  # Frank
+            # Loop through and print each answer option (A, B, C, D)
                 for opt in q["options"]: print(opt)  # Frank
+                        # Get user input, remove extra spaces, and convert to uppercase for consistency
                 answer = input("Your answer: ").strip().upper()  # Frank
                 print("✅ Correct!" if answer == q["correct_answer"] else "❌ Wrong!")
         
