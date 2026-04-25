@@ -34,9 +34,11 @@ def run_quiz():
                 "Output:{'quiz:[{'question':'...','options':['A)..','B) ..'],'correct_answer':'A'}]}"
              )
             )
-    quiz_data = json.loads(response.text)  # Convert JSON string to Python dict
-    print(json.dumps(quiz_data, indent=2))  # Pretty print the quiz
-
+            # PARSE JSON
+            raw_text = response.text.strip()
+            if "```json" in raw_text:
+                 raw_text = raw_text.split("```json")[1].split("```")[0].strip()
+            data = json.loads(raw_text)
       # Loop through and print each answer option (A, B, C, D)
     for q in quiz_data["quiz"]:  # Frank
             # Display the current question with a newline for spacing
