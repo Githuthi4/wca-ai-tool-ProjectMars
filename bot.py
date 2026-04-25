@@ -17,13 +17,13 @@ def run_quiz():
         
         ## Accept user input that is topic or text
         user_topic = input("Topic/Text (or 'exit'): ").strip()
-
+        # Exit condition to stop the program
         if user_topic.lower() == 'exit':
             break
         
         print("Generating questions...")
         try:
-        
+            # Send a request to the Gemini model to generate quiz content
             # RTCCO format
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
@@ -36,4 +36,9 @@ def run_quiz():
             )
     quiz_data = json.loads(response.text)  # Convert JSON string to Python dict
     print(json.dumps(quiz_data, indent=2))  # Pretty print the quiz
+    for q in quiz_data["quiz"]:  # Frank
+                print("\n" + q["question"])  # Frank
+                for opt in q["options"]: print(opt)  # Frank
+                answer = input("Your answer: ").strip().upper()  # Frank
+                print("✅ Correct!" if answer == q["correct_answer"] else "❌ Wrong!")
         
