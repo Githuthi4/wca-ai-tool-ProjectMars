@@ -1,60 +1,67 @@
 import json
-import google.genai as genai
-from google.genai import types
+from groq import Groq 
 
-API_KEY = "AIzaSyBKuhAKK_PkKoZs1rhqVB3k0sL3w5hzc8o" 
-client = genai.Client(api_key=API_KEY)
+# Setup and authentication (API key) 
+API_KEY = "" 
+client = Groq(api_key=API_KEY)
 
+## Main function that runs the loop 
 def run_quiz():
-    print("✨ Gemini Quiz Expert")
+
+    print("Mars Quiz Expert")
     
     while True:
-        print("\n" + "="*50)
         
         ## Accept user input that is topic or text
-        user_topic = input("Topic/Text (or 'exit'): ").strip()
-        # Exit condition to stop the program
+        user_topic = input("Enter Topic/Text (or Exit):").strip()
+
+         # Check if the user wants to close the application
         if user_topic.lower() == 'exit':
             break
-        
-        print("Generating questions...")
-        try:
-            # Send a request to the Gemini model to generate quiz content
-            # RTCCO format
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=(
-                    f"Task: Create a five 5-question multiple choice quiz on:{user_topic}."
-                    "Context: The quiz is for a students' self assesment"
-                    "Constraint: Return only JSON"
-                    "Output:{'quiz:[{'question':'...','options':['A)..','B) ..'],'correct_answer':'A'}]}"
-                )
-            )
-            # PARSE JSON
-            raw_text = response.text.strip()
-            if "```json" in raw_text:
-                 raw_text = raw_text.split("```json")[1].split("```")[0].strip()
-            quiz_data = json.loads(raw_text)
 
-            # Loop through and print each answer option (A, B, C, D)
-            for q in quiz_data["quiz"]:  
-                # Display the current question with a newline for spacing
-                print("\n" + q["question"])  
-                # Loop through and print each answer option (A, B, C, D)
-                for opt in q["options"]: 
-                    print(opt) 
-                # Get user input, remove extra spaces, and convert to uppercase for consistency
-                answer = input("Your answer: ").strip().upper()  
-                if answer == q["correct_answer"]:
+        print("Generating questions...")
+
+        try:
+            # Send a request to the model to generate quiz content
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "user", "content": (
+                        "Role: You are an Examiner."
+                        f"Task: Create a 5-question multiple choice quiz on: {user_topic}. "
+                        "Context: The quiz is s for a students' self-assessment"
+                        "Constraint: Each question must have 4 options(A-D), Only one corret answer, Keep question clear and concise, Return ONLY raw JSON"
+                        "Output: {'quiz': [{'question': '...', 'options': ['A) ..', 'B) ..'], 'correct_answer': 'A'}]}"
+                    )}
+                ],
+                response_format={"type": "json_object"}
+            )
+            
+            # PARSE JSON
+            raw_text = response.choices[0].message.content.strip()
+            data = json.loads(raw_text)
+            
+            # LOOP through the quiz 
+            score = 0
+            # enumerate(..., 1) is what gives us the Q1, Q2, Q3...
+            for i, q in enumerate(data['quiz'], 1):
+                print(f"\nQ{i}: {q['question']}")
+                for opt in q['options']:
+                    print(f"  {opt}")
+                
+                ans = input("Your Answer (A/B/C/D): ").strip().upper()
+                if ans == q['correct_answer']:
                     print("✅ Correct!")
+                    score += 1
                 else:
-                    print(f"❌ Wrong! The correct answer was: {q['correct_answer']}")
+                    print(f"❌ No, it was {q['correct_answer']}")
+
+            ## summary of the score
+            print(f"\n FINAL SCORE: {score}/5")
 
         except Exception as e:
-            # The 'Safety Net' that prevents crashes
-            print(f"⚠️ Something went wrong: {e}")
-            print("Please try again or check your internet connection.")
+            print(f"Error: {e}")
+            print("Try waiting 60 seconds before your next request.")
 
-# Start the application
 if __name__ == "__main__":
     run_quiz()
